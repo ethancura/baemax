@@ -6,6 +6,7 @@ from keras.layers import Dense
 #loading the data set
 dataset = loadtxt('OHEEPD.csv', delimiter=',')
 #splitting hte datat into x and y vars
+#print(dataset)
 x=dataset[:,0:22]
 y=dataset[:,22:27]
 #defieing keras model
@@ -28,19 +29,20 @@ model.fit(x,y, epochs=1, batch_size=32)
 _, accuracy = model.evaluate(x,y)
 print('Accuracy: %2f' %(accuracy*100))
 
-xnew= loadtxt('tlcsv.csv', delimiter=',')
+#delete =====
+#xnew= loadtxt('tlcsv.csv', delimiter=',')
 #print(xnew)
-pred=xnew[:,0:22]
+#pred=xnew[:,0:22]
+#print(pred)
 
-ynew = model.predict(pred)#using NN to predict outcomes
-first=ynew[0,:]#code had problem wiht only 1 list in the csv to put 2 lists but am only using one for the code
+#ynew = model.predict(pred)#using NN to predict outcomes
+#first=ynew[0,:]#code had problem wiht only 1 list in the csv to put 2 lists but am only using one for the code
 
-indx= np.argmax(first)#gets max number in array and prints out index 
-tl=indx+1#triage level
+#indx= np.argmax(first)#gets max number in array and prints out index 
+#tl=indx+1#triage level
 
-for i in range(len(pred)):
-    print("Precantage of each TL=%s" % (ynew[i]))
+#for i in range(len(pred)):
+    #print("Precantage of each TL=%s" % (ynew[i]))
 
 
-print("The triage level is %s" %(tl))
-
+#print("The triage level is %s" %(tl))
