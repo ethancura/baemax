@@ -139,11 +139,11 @@ class Ui_triageInterface(object):
         #write inputs to file (write twice to avoid code complications)
         with open('tlcsv.csv', 'w', newline='') as f:
             thewriter = csv.writer(f)
-            thewriter.writerow([gender,46,
+            thewriter.writerow([gender,age,
                                 visitReason1,visitReason2,visitReason3,visitReason4,visitReason5,visitReason6,visitReason7,visitReason8,visitReason9,visitReason10,visitReason11,
                                 transport,
                                 bp0,bp1,bp2,bp3,pOx,temp,hRate,rRate])
-            thewriter.writerow([gender,46,
+            thewriter.writerow([gender,age,
                                 visitReason1,visitReason2,visitReason3,visitReason4,visitReason5,visitReason6,visitReason7,visitReason8,visitReason9,visitReason10,visitReason11,
                                 transport,
                                 bp0,bp1,bp2,bp3,pOx,temp,hRate,rRate])
