@@ -17,17 +17,34 @@ from datetime import datetime
 class Ui_triageInterface(object):
     #grab inputs from UI
     def button_click(self):
+        invalid_input = False
+
         #patient Name
         firstName = self.patientFirstNameLineEdit.text()
         lastName = self.patientLastNameLineEdit.text()
+        if(firstName == "" or lastName == ""):
+            error = QMessageBox()
+            error.setWindowTitle('Name Error')
+            error.setText("Please enter your First and/or Last Name")
+            error.setIcon(QMessageBox.Critical)
+            x = error.exec_()
+            invalid_input = True
 
         #patient Sex
+        gender = -1
         isMale = self.maleRadioButton.isChecked()
         isFemale = self.radioButton.isChecked()
         if(isMale):
             gender = 0
         if(isFemale):
             gender = 1
+        if(gender == -1):
+            error = QMessageBox()
+            error.setWindowTitle('Sex Error')
+            error.setText("Please select appropriate sex")
+            error.setIcon(QMessageBox.Critical)
+            x = error.exec_()
+            invalid_input = True
 
         #patient Age
         DOB = self.DOBQDateEdit.date()
@@ -45,7 +62,14 @@ class Ui_triageInterface(object):
         if(CurrentDateMonth < DOBMonth): age = age - 1
         if(CurrentDateMonth == DOBMonth):
             if(CurrentDateDate < DOBDate): age = age - 1
-        
+        if (age > 110): 
+            error = QMessageBox()
+            error.setWindowTitle('DOB Error')
+            error.setText("Please enter a valid Date of Birth")
+            error.setIcon(QMessageBox.Critical)
+            x = error.exec_()
+            invalid_input = True
+
         #patient Reason for Visit
         visitInput = self.reasonForVisitComboBox.currentText()
         if(visitInput == "Stomach or abdominal pain, cramps, or spasms"):
@@ -92,14 +116,29 @@ class Ui_triageInterface(object):
             visitReason11 = 1
         else:
             visitReason11 = 0
+        if(visitInput == "select"):
+            error = QMessageBox()
+            error.setWindowTitle('Visit Reason Error')
+            error.setText("Please select a reason for visit")
+            error.setIcon(QMessageBox.Critical)
+            x = error.exec_()
+            invalid_input = True
 
         #patient mode of transportation
+        transport = -1
         isAmbulance = self.radioButton_2.isChecked()
         isOther = self.radioButton_3.isChecked()
         if(isAmbulance):
             transport = 1
         if(isOther):
             transport = 0
+        if(transport == -1):
+            error = QMessageBox()
+            error.setWindowTitle('Transportation Error')
+            error.setText("Please select a mode of transportation")
+            error.setIcon(QMessageBox.Critical)
+            x = error.exec_()
+            invalid_input = True
 
         #vitals blood pressure
         bpInput = self.comboBox.currentText()
@@ -119,72 +158,131 @@ class Ui_triageInterface(object):
             bp3 = 1
         else:
             bp3 = 0
+        if(bpInput == "select"):
+            error = QMessageBox()
+            error.setWindowTitle('BP Error')
+            error.setText("Please select a valid Blood Pressure reading")
+            error.setIcon(QMessageBox.Critical)
+            x = error.exec_()
+            invalid_input = True
 
-        #vitals pulse oximetry
+        #vitals pulse oximetry (cap at 100)
         pulseOximetry = float(self.pulseOxLineEdit.text())
+        if(pulseOximetry > 100 or pulseOximetry < 0):
+            error = QMessageBox()
+            error.setWindowTitle('pOx Error')
+            error.setText("Please enter a valid Pulse Oximetry reading")
+            error.setIcon(QMessageBox.Critical)
+            x = error.exec_()
+            invalid_input = True
         if(pulseOximetry >= 95 and pulseOximetry <= 100):
             pOx = 0
         else:
             pOx = 1
 
-        #vitals temperature
+        #vitals temperature (55-115) [high chance of death]
         temp = float(self.tempLineEdit.text())
+        if(temp < 55 or temp > 115):
+            error = QMessageBox()
+            error.setWindowTitle('Temp Error')
+            error.setText("Please enter a valid Temperature reading")
+            error.setIcon(QMessageBox.Critical)
+            x = error.exec_()
+            invalid_input = True
         
-        #vitals heart rate
+        #vitals heart rate (0-220)
         hRate = float(self.heartLineEdit.text())
+        if(hRate < 0 or hRate > 220):
+            error = QMessageBox()
+            error.setWindowTitle('HR Error')
+            error.setText("Please enter a valid Heart Rate reading")
+            error.setIcon(QMessageBox.Critical)
+            x = error.exec_()
+            invalid_input = True
 
-        #vitals respiratory rate
+        #vitals respiratory rate (0-80)
         rRate = float(self.respLineEdit.text())
+        if(rRate < 0 or rRate > 80):
+            error = QMessageBox()
+            error.setWindowTitle('RR Error')
+            error.setText("Please enter a valid Respiratory Rate reading")
+            error.setIcon(QMessageBox.Critical)
+            x = error.exec_()
+            invalid_input = True
 
-        #write inputs to file (write twice to avoid code complications)
-        with open('tlcsv.csv', 'w', newline='') as f:
-            thewriter = csv.writer(f)
-            thewriter.writerow([gender,age,
-                                visitReason1,visitReason2,visitReason3,visitReason4,visitReason5,visitReason6,visitReason7,visitReason8,visitReason9,visitReason10,visitReason11,
-                                transport,
-                                bp0,bp1,bp2,bp3,pOx,temp,hRate,rRate])
-            thewriter.writerow([gender,age,
-                                visitReason1,visitReason2,visitReason3,visitReason4,visitReason5,visitReason6,visitReason7,visitReason8,visitReason9,visitReason10,visitReason11,
-                                transport,
-                                bp0,bp1,bp2,bp3,pOx,temp,hRate,rRate])
 
-        #calculate output using keras_nn
-        xnew = np.loadtxt('tlcsv.csv', delimiter=',')
-        pred = xnew[:,0:22]
-        ynew = model.predict(pred) #the NN model
-        first = ynew[0,:] #grab only list 1
-        indx = np.argmax(first) #get max num in array and print out index
-        tl=indx+1 #triage level
+        if(invalid_input == False):
+            #write inputs to file (write twice to avoid code complications)
+            with open('tlcsv.csv', 'w', newline='') as f:
+                thewriter = csv.writer(f)
+                thewriter.writerow([gender,age,
+                                    visitReason1,visitReason2,visitReason3,visitReason4,visitReason5,visitReason6,visitReason7,visitReason8,visitReason9,visitReason10,visitReason11,
+                                    transport,
+                                    bp0,bp1,bp2,bp3,pOx,temp,hRate,rRate])
+                thewriter.writerow([gender,age,
+                                    visitReason1,visitReason2,visitReason3,visitReason4,visitReason5,visitReason6,visitReason7,visitReason8,visitReason9,visitReason10,visitReason11,
+                                    transport,
+                                    bp0,bp1,bp2,bp3,pOx,temp,hRate,rRate])
 
-        #output to results file
+            #calculate output using keras_nn
+            xnew = np.loadtxt('tlcsv.csv', delimiter=',')
+            pred = xnew[:,0:22]
+            ynew = model.predict(pred) #the NN model
+            first = ynew[0,:] #grab only list 1
+            indx = np.argmax(first) #get max num in array and print out index
+            tl=indx+1 #triage level
 
-        #to see output from the interface onto terminal (delete later)
-        print(firstName, lastName)
-        print("sex:", gender)
-        print("dob:", DOBString)
-        print("age:", age)
-        print("reason for visit:", visitInput)
-        print(visitReason1, visitReason2, visitReason3, visitReason4, visitReason5, visitReason6, visitReason7, visitReason8, visitReason9, visitReason10, visitReason11)
-        print("mode of transport:", transport)
-        print("blood pressure:", bpInput)
-        print(bp0, bp1, bp2, bp3)
-        print("pulse oximetry:", pulseOximetry, pOx)
-        print("temperature:", temp)
-        print("heart rate:", hRate)
-        print("respiratory rate:", rRate)
-        print("predicted triage level:", tl)
-        print("\n")
+            #to see output from the interface onto terminal (delete later)
+            print(firstName, lastName)
+            print("sex:", gender)
+            print("dob:", DOBString)
+            print("age:", age)
+            print("reason for visit:", visitInput)
+            print(visitReason1, visitReason2, visitReason3, visitReason4, visitReason5, visitReason6, visitReason7, visitReason8, visitReason9, visitReason10, visitReason11)
+            print("mode of transport:", transport)
+            print("blood pressure:", bpInput)
+            print(bp0, bp1, bp2, bp3)
+            print("pulse oximetry:", pulseOximetry, pOx)
+            print("temperature:", temp)
+            print("heart rate:", hRate)
+            print("respiratory rate:", rRate)
+            print("predicted triage level:", tl)
+            print("\n")
 
-        #place output to result interface
-        if(tl == 1): tMessage = "1 - Needs Immediate Lifesaving Intervention"
-        if(tl == 2): tMessage = "2 - High Risk"
-        if(tl == 3): tMessage = "3 - Two or more Resources"
-        if(tl == 4): tMessage = "4 - One or more Resources"
-        if(tl == 5): tMessage = "5 - No Resources"
-        msg = QMessageBox()
-        msg.setWindowTitle('eTriage Result')
-        msg.setText("The predicted triage level for patient " + firstName + " " + lastName + ": \n" + tMessage)
-        x = msg.exec_()
+            #place output to result interface
+            t1 = 0
+            t2 = 0
+            t3 = 0
+            t4 = 0
+            t5 = 0
+            if(tl == 1): 
+                t1 = 1
+                tMessage = "1 - Needs Immediate Lifesaving Intervention"
+            if(tl == 2): 
+                t2 = 1
+                tMessage = "2 - High Risk"
+            if(tl == 3): 
+                t3 = 1
+                tMessage = "3 - Two or more Resources"
+            if(tl == 4): 
+                t4 = 1
+                tMessage = "4 - One or more Resources"
+            if(tl == 5): 
+                t5 = 1
+                tMessage = "5 - No Resources"
+            msg = QMessageBox()
+            msg.setWindowTitle('eTriage Result')
+            msg.setText("The predicted triage level for patient " + firstName + " " + lastName + ": \n" + tMessage)
+            x = msg.exec_()
+
+            #put output in file
+            with open('triageResultsCSV.csv', 'a', newline='') as f:
+                thewriter = csv.writer(f)
+                thewriter.writerow([gender,age,
+                                    visitReason1,visitReason2,visitReason3,visitReason4,visitReason5,visitReason6,visitReason7,visitReason8,visitReason9,visitReason10,visitReason11,
+                                    transport,
+                                    bp0,bp1,bp2,bp3,pOx,temp,hRate,rRate, 
+                                    t1, t2, t3, t4, t5])
         
     def setupUi(self, triageInterface):
         triageInterface.setObjectName("triageInterface")
@@ -340,7 +438,6 @@ class Ui_triageInterface(object):
         self.pushButton.setGeometry(QtCore.QRect(810, 370, 101, 31))
         self.pushButton.setObjectName("pushButton") #calculateButton
 
-        #self.pushButton.clicked.connect(self.openWindow) #open results window (delete)
         self.pushButton.clicked.connect(self.button_click) #grab inputs
 
         self.retranslateUi(triageInterface)
@@ -390,5 +487,6 @@ if __name__ == "__main__":
     ui = Ui_triageInterface()
     ui.setupUi(triageInterface)
     triageInterface.show()
+
     sys.exit(app.exec_())
 
