@@ -8,10 +8,9 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox 
-#from triageResultUI import Ui_triageResult
 import numpy as np
 import csv
-from keras_nn import model
+import keras
 from datetime import datetime
 
 class Ui_triageInterface(object):
@@ -225,9 +224,10 @@ class Ui_triageInterface(object):
                                     bp0,bp1,bp2,bp3,pOx,temp,hRate,rRate])
 
             #calculate output using keras_nn
+            knn_model = keras.models.load_model("eTriage_model")
             xnew = np.loadtxt('tlcsv.csv', delimiter=',')
             pred = xnew[:,0:22]
-            ynew = model.predict(pred) #the NN model
+            ynew = knn_model.predict(pred) #the NN model
             first = ynew[0,:] #grab only list 1
             indx = np.argmax(first) #get max num in array and print out index
             tl=indx+1 #triage level
