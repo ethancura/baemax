@@ -3,9 +3,11 @@ import numpy as np
 from numpy import loadtxt
 from keras.models import Sequential
 from keras.layers import Dense
+
 #loading the data set
 dataset = loadtxt('OHEEPD.csv', delimiter=',')
 #splitting hte datat into x and y vars
+#print(dataset)
 x=dataset[:,0:22]
 y=dataset[:,22:27]
 #defieing keras model
@@ -22,25 +24,11 @@ model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy']
 #fit the model 
 #epoch-one pass through of all of the rows in a training set(one epoch is made of 1 or more batches)
 #batch-one or more samples considered by the model within an epoch before weights are updated
-model.fit(x,y, epochs=1, batch_size=32)
+model.fit(x,y, epochs=100, batch_size=50)
 
 #evaluate the model
 _, accuracy = model.evaluate(x,y)
 print('Accuracy: %2f' %(accuracy*100))
 
-xnew= loadtxt('tlcsv.csv', delimiter=',')
-#print(xnew)
-pred=xnew[:,0:22]
-
-ynew = model.predict(pred)#using NN to predict outcomes
-first=ynew[0,:]#code had problem wiht only 1 list in the csv to put 2 lists but am only using one for the code
-
-indx= np.argmax(first)#gets max number in array and prints out index 
-tl=indx+1#triage level
-
-for i in range(len(pred)):
-    print("Precantage of each TL=%s" % (ynew[i]))
-
-
-print("The triage level is %s" %(tl))
-
+#saving the model 
+model.save("eTriage_model")
